@@ -1,33 +1,29 @@
-const http = require("http");
-const fs = require("fs").promises;
+const express = require("express");
+const app = express();
 
-http
-  .createServer(async (req, res) => {
-    const url = new URL(req.url, `http://${req.headers.host}`);
+const options = {
+  root: __dirname,
+};
 
-    try {
-      let file;
-      let status = 200;
-      switch (url.pathname) {
-        case "/":
-          file = await fs.readFile("./index.html");
-          break;
-        case "/about":
-          file = await fs.readFile("./about.html");
-          break;
-        case "/contact-me":
-          file = await fs.readFile("./contact-me.html");
-          break;
-        default:
-          status = 404;
-          file = await fs.readFile("./404.html");
-      }
-      res.writeHead(status, { "Content-Type": "text/html" });
-      res.end(file);
-    } catch (err) {
-      console.log(err);
-      res.writeHead(500, { "Content-Type": "text/html" });
-      res.end("Internal Server Error");
-    }
-  })
-  .listen(8080);
+app.get("/", (req, res) => {
+  res.sendFile("./index.html", options);
+});
+
+app.get("/about", (req, res) => {
+  res.sendFile("./about.html", options);
+});
+
+app.get("/contact-me", (req, res) => {
+  res.sendFile("./contact-me.html", options);
+});
+
+app.use((req, res) => {
+  res.status(404).sendFile("./404.html", options);
+});
+
+app.listen(8080, (err) => {
+  if (err) {
+    throw err;
+  }
+  console.log("Running on port 8080");
+});
